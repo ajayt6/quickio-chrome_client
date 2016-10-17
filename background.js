@@ -54,21 +54,69 @@ var imported = document.createElement('script');
 imported.src = 'socket.io.js';
 document.head.appendChild(imported);
  */
- 
+
+function doInAllTabs(tabCallback) {
+	chrome.tabs.query(
+		{},
+		function (tabArray) {
+			tabCallback(tabArray);
+		}
+	);
+
+}
+
+	function doInCurrentTab(tabCallback) {
+    chrome.tabs.query(
+        { currentWindow: true, active: true },
+        function (tabArray) { tabCallback(tabArray[0]); }
+    );
+}
+
+
 var myPrettyCode = function() {
 
    var socket = io(url);
 
   socket.on('chat message', function(msg){
-	  if(msg == "Yo the kid authenticated alright")
+	  if(msg.includes("921"))//str.includes("world")//msg == "Yo the kid authenticated alright")
 	  {
-			var newURL = "https://www.youtube.com/watch?v=CSvFpBOe8eY";
-			chrome.tabs.create({ url: newURL });
+			msg = msg.replace("921"," ");
+			//socket.broadcast.emit('chat message','yoyomama');
+			
+			if(msg.includes("closeyo"))
+			{
+					var activeTabId;
+					//doInCurrentTab( function(tab){ activeTabId = tab.id 
+					//chrome.tabs.remove(activeTabId);
+					//} );
+					doInAllTabs( function(tabArray){
+						console.log("One id of tab is: "+tabArray[0].id);
+						lastIndex = tabArray.length-1;
+						console.log("The last index is: "+ lastIndex);
+						lastTabId = tabArray[lastIndex].id
+						chrome.tabs.remove(lastTabId);
+					} );
+			}
+			else
+			{
+					var newURL = "https://duckduckgo.com/?q=!ducky+site:www.youtube.com+" + msg;
+					chrome.tabs.create({ url: newURL });
+				
+			}
+			
+			
+			
 	  }
 	  else if(msg == "music")
 	  {
-			var newURL = "https://www.youtube.com/watch?v=YlfUcnSbKDA";
+			var newURL = "https://www.google.com";
 			chrome.tabs.create({ url: newURL });
+	  }
+	  else
+	  {
+		  var newURL = "https://www.yahoo.com";
+			//chrome.tabs.create({ url: newURL });
+			//socket.broadcast.emit('chat message','yo yahoo');
 	  }
     
 	
@@ -79,13 +127,7 @@ var myPrettyCode = function() {
 loadScript( myPrettyCode);
 
 
-//The Main Function
-function kernel(choice)
-{
-multiple=0;
 
-	
-}
 
 
 
