@@ -3,7 +3,7 @@
       "scripts": [ "background.js" ]
    },
    "description": "Simple helper extension at this stage",
-   "homepage_url": "",
+  
    
    "manifest_version": 2,
    "name": "Quicky-Chrome",
@@ -11,6 +11,6 @@
       "keyword": "`"
    },
    "permissions": [ "tabs", "contextMenus" ],
-   
+   "content_security_policy":"script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js; object-src 'self'",
    "version": "0.1.00"
 }

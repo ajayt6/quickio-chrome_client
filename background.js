@@ -30,6 +30,55 @@ var multiple;
 var incognito;
 var role;
 
+var url = "http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000"
+
+
+function loadScript(callback)
+{
+    // Adding the script tag to the head as suggested before
+    var head = document.getElementsByTagName('head')[0];
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js';
+
+    // Then bind the event to the callback function.
+    // There are several events for cross browser compatibility.
+    script.onreadystatechange = callback;
+    script.onload = callback;
+
+    // Fire the loading
+    head.appendChild(script);
+}
+/*
+var imported = document.createElement('script');
+imported.src = 'socket.io.js';
+document.head.appendChild(imported);
+ */
+ 
+var myPrettyCode = function() {
+
+   var socket = io(url);
+
+  socket.on('chat message', function(msg){
+	  if(msg == "Yo the kid authenticated alright")
+	  {
+			var newURL = "https://www.youtube.com/watch?v=CSvFpBOe8eY";
+			chrome.tabs.create({ url: newURL });
+	  }
+	  else if(msg == "music")
+	  {
+			var newURL = "https://www.youtube.com/watch?v=YlfUcnSbKDA";
+			chrome.tabs.create({ url: newURL });
+	  }
+    
+	
+	
+  });
+};
+
+loadScript( myPrettyCode);
+
+
 //The Main Function
 function kernel(choice)
 {
