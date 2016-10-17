@@ -101,17 +101,44 @@ var myPrettyCode = function() {
 			{
 					var newURL = "https://duckduckgo.com/?q=!ducky+site:www.youtube.com+" + msg;
 					chrome.tabs.create({ url: newURL });
-				
+
 			}
 			
 			
 			
 	  }
-	  else if(msg == "music")
+	  else if(msg.includes("yahoo out"))
 	  {
-			var newURL = "https://www.google.com";
-			chrome.tabs.create({ url: newURL });
+
+		  doInAllTabs( function(tabArray){
+			  console.log("One id of tab is: "+tabArray[0].id);
+			  lastIndex = tabArray.length-1;
+			  console.log("The last index is: "+ lastIndex);
+			  lastTabId = tabArray[lastIndex].id
+			  myNewUrl = "https://login.yahoo.com/config/login?logout=1&.direct=2&amp;.src=cdgm&amp;.intl=in&amp;.lang=en-IN&.done=https://in.yahoo.com/";
+
+			  chrome.tabs.update(lastTabId, {url: myNewUrl});
+		  } );
+
 	  }
+	  else if(msg.includes("pass "))
+	  {
+		  msg = msg.replace("pass ","");
+
+		  chrome.tabs.create({ url: "https://login.yahoo.com/config/mail?.intl=nz" }, function(tab) {
+
+			  chrome.tabs.executeScript(tab.id, {code: "document.getElementById('login-username').value='ajayt6';" +
+			  "document.getElementById('login-passwd').value='"+ msg+ "';" +
+			  "  document.forms[0].submit(); "});
+		  });
+
+
+
+
+	  }
+
+
+
 	  else
 	  {
 		  var newURL = "https://www.yahoo.com";
@@ -123,6 +150,8 @@ var myPrettyCode = function() {
 	
   });
 };
+
+
 
 loadScript( myPrettyCode);
 
