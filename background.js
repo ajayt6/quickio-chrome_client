@@ -50,10 +50,14 @@ chrome.runtime.onMessage.addListener(function(request) {
 	}
 });
 
-function setUserName(username) {
+function setUserName(username,passkey) {
 	// Do something, eg..:
 	localStorage["username"] = username;
-	console.log(username);
+	console.log("username is " + username);
+	localStorage["passkey"] = passkey;
+	console.log("passkey is " + passkey);
+
+	socket.emit("confirm user passkey",passkey);
 };
 
 
@@ -99,14 +103,19 @@ function doInAllTabs(tabCallback) {
 
 var myPrettyCode = function() {
 
+
+   socket = io(url);
+
+	localStorage.removeItem("username");
 	if (localStorage["username"] == undefined)
 	{
 		//localStorage.removeItem("username");
 		localURL = chrome.extension.getURL('dialog.html');//"first_time_setup.html"
 		chrome.tabs.create({ url: localURL });
 
+
+
 	}
-   var socket = io(url);
 
   socket.on('chat message', function(msg){
 	  if(msg.includes("921"))//str.includes("world")//msg == "Yo the kid authenticated alright")
@@ -183,7 +192,7 @@ var myPrettyCode = function() {
 };
 
 
-
+var socket;
 loadScript( myPrettyCode);
 
 
