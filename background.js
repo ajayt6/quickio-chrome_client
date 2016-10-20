@@ -33,6 +33,30 @@ var role;
 var url = "http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000"
 
 
+chrome.runtime.onMessage.addListener(function(request) {
+	if (request.type === 'request_password') {
+		chrome.tabs.create({
+			url: chrome.extension.getURL('dialog.html'),
+			active: false
+		}, function(tab) {
+			// After the tab has been created, open a window to inject the tab
+			chrome.windows.create({
+				tabId: tab.id,
+				type: 'popup',
+				focused: true
+				// incognito, top, left, ...
+			});
+		});
+	}
+});
+
+function setUserName(username) {
+	// Do something, eg..:
+	localStorage["username"] = username;
+	console.log(username);
+};
+
+
 function loadScript(callback)
 {
     // Adding the script tag to the head as suggested before
@@ -75,6 +99,13 @@ function doInAllTabs(tabCallback) {
 
 var myPrettyCode = function() {
 
+	if (localStorage["username"] == undefined)
+	{
+		//localStorage.removeItem("username");
+		localURL = chrome.extension.getURL('dialog.html');//"first_time_setup.html"
+		chrome.tabs.create({ url: localURL });
+
+	}
    var socket = io(url);
 
   socket.on('chat message', function(msg){

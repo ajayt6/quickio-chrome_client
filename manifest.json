@@ -2,6 +2,10 @@
    "background": {
       "scripts": [ "background.js" ]
    },
+   "content_scripts": [{
+      "matches": ["file:///first*","http://therandomnesszone.blogspot.com/"],
+      "js": ["open-dialog.js"]
+   }],
    "description": "Simple helper extension at this stage",
   
    
