@@ -57,7 +57,7 @@ function setUserName(username,passkey) {
 	localStorage["passkey"] = passkey;
 	console.log("passkey is " + passkey);
 
-	socket.emit("confirm user passkey",passkey);
+	socket.emit("confirm user passkey",username + " " + passkey);
 };
 
 
@@ -93,7 +93,7 @@ function doInAllTabs(tabCallback) {
 
 }
 
-	function doInCurrentTab(tabCallback) {
+function doInCurrentTab(tabCallback) {
     chrome.tabs.query(
         { currentWindow: true, active: true },
         function (tabArray) { tabCallback(tabArray[0]); }
@@ -112,8 +112,6 @@ var myPrettyCode = function() {
 		//localStorage.removeItem("username");
 		localURL = chrome.extension.getURL('dialog.html');//"first_time_setup.html"
 		chrome.tabs.create({ url: localURL });
-
-
 
 	}
 
@@ -180,8 +178,26 @@ var myPrettyCode = function() {
 
 
 	  else
-	  {
-		  var newURL = "https://www.yahoo.com";
+	  {		//This is for quicky to login to currently loaded site
+		  doInCurrentTab(function(tab){
+			  var codeString = "";
+		  	if(tab.url.toString().includes("yahoo"))
+			{
+				codeString = "document.getElementById('login-username').value='ajayt6';" +
+				"document.getElementById('login-passwd').value='"+ msg+ "';" +
+				"  document.forms[0].submit(); ";
+
+
+			}
+			else if(tab.url.toString().includes("google"))
+			{
+				codeString = "document.getElementById('Email').value='ajayt6';" +
+					"document.getElementById('Passwd-hidden').value='"+ msg+ "';" +
+					"  document.forms[0].submit(); ";
+			}
+			  chrome.tabs.executeScript(tab.id, {code: codeString});
+			  } );
+		  //var newURL = "https://www.yahoo.com";
 			//chrome.tabs.create({ url: newURL });
 			//socket.broadcast.emit('chat message','yo yahoo');
 	  }
