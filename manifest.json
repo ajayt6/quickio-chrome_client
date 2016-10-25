@@ -7,6 +7,9 @@
       "js": ["open-dialog.js"]
    }],
    "description": "Simple helper extension at this stage",
+   "browser_action": {
+      "default_popup": "popup.html"
+   },
   
    
    "manifest_version": 2,
@@ -15,6 +18,6 @@
       "keyword": "`"
    },
    "permissions": [ "tabs", "contextMenus","http://*/*", "https://*/*" ],
-   "content_security_policy":"script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js; object-src 'self'",
+   "content_security_policy":"script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64-min.js; object-src 'self'",
    "version": "0.1.00"
 }
