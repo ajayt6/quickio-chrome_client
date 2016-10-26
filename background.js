@@ -34,6 +34,14 @@ function setUserName(username,passkey) {
 
 	console.log("The original message is: " + messageOrig);
 
+	/*
+	setTimeout(function () {
+
+			//pUT SOMETHING HERE IF YOU WANT IT TO RUN AFTER TIMEOUT OF 10 SEC
+
+	}, 10000);
+	*/
+
 	// Save it using the Chrome extension storage API.
 	chrome.storage.sync.set({'usernameEncrypted': encrypted}, function() {
 		// Notify that we saved.
@@ -43,36 +51,41 @@ function setUserName(username,passkey) {
 		console.log('encrypted var unset and it is: ' + encrypted);
 	});
 
+
 	chrome.storage.sync.set({'password': passkey}, function() {
 		// Notify that we saved.
 
 		console.log('password saved');
 	});
 
-
-
-
-	chrome.storage.sync.get(/* String or Array */"usernameEncrypted", function(items){
+	var def1 = chrome.storage.sync.get(/* String or Array */"usernameEncrypted", function(items){
 		//  items = [ { "yourBody": "myBody" } ]
 		encrypted = items.usernameEncrypted;
 		console.log("retrieved is: " + items.usernameEncrypted.toString());
 
-		chrome.storage.sync.get(/* String or Array */"password", function(items) {
-			secretKey = items.password;
-			console.log("retrieved is: " + items.password.toString());
+		var dfrd = $.Deferred();
+		dfrd.resolve(items.usernameEncrypted);
+
+		return dfrd.promise();
 
 
-			var decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
-
-			console.log("The encrypted message is: " + encrypted);
-			console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
-		});
 	});
 
+	var def2 = chrome.storage.sync.get(/* String or Array */"password", function(items) {
+		secretKey = items.password;
+		console.log("retrieved is: " + items.password.toString());
 
+		var dfrd = $.Deferred();
+		dfrd.resolve(items.usernameEncrypted);
 
+		return dfrd.promise();
+	});
 
-
+	$.when(def1, def2).then(function () {
+		var decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
+		console.log("The encrypted message is: " + encrypted);
+		console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
+	});
 
 	socket.emit("confirm user passkey",username + " " + passkey);
 };
@@ -85,6 +98,7 @@ function loadScript(callback)
 		'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js',
 		'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js',
 		'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/aes.js',
+		'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js',
 		'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js'
 
 	].forEach(function(src) {
