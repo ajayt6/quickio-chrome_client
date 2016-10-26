@@ -28,13 +28,58 @@ function setUserName(username,passkey) {
 	localStorage["passkey"] = passkey;
 	console.log("passkey is " + passkey);
 
+	var messageOrig = username;
+	var secretKey = passkey;
+	var encrypted = CryptoJS.AES.encrypt(messageOrig, secretKey);
+
+	console.log("The original message is: " + messageOrig);
+
+	// Save it using the Chrome extension storage API.
+	chrome.storage.sync.set({'usernameEncrypted': encrypted}, function() {
+		// Notify that we saved.
+
+		console.log('encrypted username saved');
+		encrypted = "unset";
+		console.log('encrypted var unset and it is: ' + encrypted);
+	});
+
+	chrome.storage.sync.set({'password': passkey}, function() {
+		// Notify that we saved.
+
+		console.log('password saved');
+	});
+
+
+
+
+	chrome.storage.sync.get(/* String or Array */"usernameEncrypted", function(items){
+		//  items = [ { "yourBody": "myBody" } ]
+		encrypted = items.usernameEncrypted;
+		console.log("retrieved is: " + items.usernameEncrypted.toString());
+
+		chrome.storage.sync.get(/* String or Array */"password", function(items) {
+			secretKey = items.password;
+			console.log("retrieved is: " + items.password.toString());
+
+
+			var decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
+
+			console.log("The encrypted message is: " + encrypted);
+			console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
+		});
+	});
+
+
+
+
+
+
 	socket.emit("confirm user passkey",username + " " + passkey);
 };
 
 
 function loadScript(callback)
 {
-	console.log("before");
 
 	[
 		'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js',
@@ -87,14 +132,10 @@ var myPrettyCode = function() {
 
    socket = io(url);
 
-	var messageOrig = "Me";
-	var encrypted = CryptoJS.AES.encrypt(messageOrig, "Secret");
-	var decrypted = CryptoJS.AES.decrypt(encrypted, "Secret");
 
 
-	console.log("The original message is: " + messageOrig);
-	console.log("The encrypted message is: " + encrypted);
-	console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
+
+
 
 	localStorage.removeItem("username");
 	if (localStorage["username"] == undefined)
@@ -104,6 +145,9 @@ var myPrettyCode = function() {
 		chrome.tabs.create({ url: localURL });
 
 	}
+
+
+
 
   socket.on('chat message', function(msg){
 	  if(msg.includes("921"))//str.includes("world")//msg == "Yo the kid authenticated alright")
