@@ -1,2 +1,3 @@
-# Chrome client for Quicky notification system
-(Now code has a lot of hardcoded values. But it is able to receive signal from android device and take a basic action)
+# Chrome client for Quicky password manager
+(Work in progress)
+Quicky is a password manager with remote fingerprint authentication support from Android phones to PC 
