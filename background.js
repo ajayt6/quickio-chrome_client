@@ -25,11 +25,31 @@ chrome.runtime.onMessage.addListener(function(request) {
 
 function saveLoginInfo(sitename,username,password) {
 
+	/*
 	localStorage["sitename"] = sitename;
 	localStorage["username"] = username;
 	//console.log("username is " + username);
 	localStorage["password"] = password;
-	console.log("Retrieved password is " + localStorage["password"]);
+	//console.log("Retrieved password is " + localStorage["password"]);
+	*/
+
+
+	chrome.storage.local.get({userSiteDetails: {}}, function (result) {
+
+		var userSiteDetails = result.userSiteDetails;
+
+		userSiteDetails.sitename = {username: username,password: password};
+
+		chrome.storage.local.set({userSiteDetails: userSiteDetails}, function () {
+			chrome.storage.local.get('userSiteDetails', function (result) {
+				console.log(result.userSiteDetails)
+				for(var i in result.userSiteDetails)
+				{
+					console.log("key " + i + " has value for username as " + userSiteDetails[i]["username"]);
+				}
+			});
+		});
+	});
 
 }
 
@@ -97,7 +117,14 @@ function setUserName(username,passkey) {
 		var decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
 		console.log("The encrypted message is: " + encrypted);
 		console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
+
+		if(username.includes("clear"))
+		{
+			chrome.storage.local.clear(function(){});
+		}
 	});
+
+
 
 	socket.emit("confirm user passkey",username + " " + passkey);
 };
