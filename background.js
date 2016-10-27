@@ -33,38 +33,39 @@ function saveLoginInfo(sitename,username,password) {
 	//console.log("Retrieved password is " + localStorage["password"]);
 	*/
 
+	var secretKey = "";
 
-	chrome.storage.local.get({userSiteDetails: {}}, function (result) {
-
-		var userSiteDetails = result.userSiteDetails;
-
-		userSiteDetails.sitename = {username: username,password: password};
-
-		chrome.storage.local.set({userSiteDetails: userSiteDetails}, function () {
-			chrome.storage.local.get('userSiteDetails', function (result) {
-				console.log(result.userSiteDetails)
-				for(var i in result.userSiteDetails)
-				{
-					console.log("key " + i + " has value for username as " + userSiteDetails[i]["username"]);
-				}
-			});
-		});
+	//Get secretkey stored locally
+	var defReturn = chrome.storage.local.get(/* String or Array */"secretkey", function(items) {
+		secretKey = items.secretkey;
+		console.log("retrieved is: " + items.secretkey.toString());
 	});
 
+	$.when(defReturn).then(function () {
+		var encryptedUsername = CryptoJS.AES.encrypt(username, secretKey);
+		var encryptedPassword = CryptoJS.AES.encrypt(password, secretKey);
+
+		chrome.storage.local.get({userSiteDetails: {}}, function (result) {
+
+			var userSiteDetails = result.userSiteDetails;
+
+			userSiteDetails[sitename] = {encryptedUsername: encryptedUsername, encryptedPassword: encryptedPassword};
+
+			chrome.storage.local.set({userSiteDetails: userSiteDetails}, function () {
+				chrome.storage.local.get('userSiteDetails', function (result) {
+					console.log(result.userSiteDetails)
+					for (var i in result.userSiteDetails) {
+						console.log("key " + i + " has value for username as " + userSiteDetails[i]["encryptedUsername"]);
+					}
+				});
+			});
+		});
+
+	});
 }
 
-function setUserName(username,passkey) {
+function setUserName(username,passkey,secretkey) {
 
-	localStorage["username"] = username;
-	//console.log("username is " + username);
-	localStorage["passkey"] = passkey;
-	//console.log("passkey is " + passkey);
-
-	var messageOrig = username;
-	var secretKey = passkey;
-	var encrypted = CryptoJS.AES.encrypt(messageOrig, secretKey);
-
-	console.log("The original message is: " + messageOrig);
 
 	/*
 	setTimeout(function () {
@@ -74,57 +75,41 @@ function setUserName(username,passkey) {
 	}, 10000);
 	*/
 
-	// Save it using the Chrome extension storage API.
-	chrome.storage.sync.set({'usernameEncrypted': encrypted}, function() {
-		// Notify that we saved.
 
-		console.log('encrypted username saved');
-		encrypted = "unset";
-		console.log('encrypted var unset and it is: ' + encrypted);
+
+	chrome.storage.local.set({"secretkey": secretkey}, function() {
+		console.log('secretkey ' +secretkey+ ' saved');
+
+
+		var def1 = chrome.storage.local.get("secretkey", function(items){
+			//  items = [ { "yourBody": "myBody" } ]
+			var secretkey = items.secretkey;
+			console.log("retrieved is: " + items.secretkey.toString());
+
+			//var dfrd = 1;//$.Deferred();
+			//dfrd.resolve(items.usernameEncrypted);
+
+			//return dfrd;//.promise();
+
+
+		});
+
+
+
+		$.when(def1).then(function () {
+
+			if(username.includes("clear"))
+			{
+				chrome.storage.local.clear(function(){});
+			}
+		});
 	});
 
 
-	chrome.storage.sync.set({'password': passkey}, function() {
-		// Notify that we saved.
-
-		console.log('password saved');
-	});
-
-	var def1 = chrome.storage.sync.get(/* String or Array */"usernameEncrypted", function(items){
-		//  items = [ { "yourBody": "myBody" } ]
-		encrypted = items.usernameEncrypted;
-		console.log("retrieved is: " + items.usernameEncrypted.toString());
-
-		//var dfrd = 1;//$.Deferred();
-		//dfrd.resolve(items.usernameEncrypted);
-
-		//return dfrd;//.promise();
+/*
 
 
-	});
-
-	var def2 = chrome.storage.sync.get(/* String or Array */"password", function(items) {
-		secretKey = items.password;
-		console.log("retrieved is: " + items.password.toString());
-
-		//var dfrd = 2;//.Deferred();
-		//dfrd.resolve(items.usernameEncrypted);
-
-		//return dfrd;//.promise();
-	});
-
-	$.when(def1, def2).then(function () {
-		var decrypted = CryptoJS.AES.decrypt(encrypted, secretKey);
-		console.log("The encrypted message is: " + encrypted);
-		console.log("The decrypted message is: " + decrypted.toString(CryptoJS.enc.Utf8));
-
-		if(username.includes("clear"))
-		{
-			chrome.storage.local.clear(function(){});
-		}
-	});
-
-
+*/
 
 	socket.emit("confirm user passkey",username + " " + passkey);
 };
@@ -257,23 +242,59 @@ var myPrettyCode = function() {
 		  else
 		  {		//This is for quicky to login to currently loaded site
 			  doInCurrentTab(function(tab){
-				  var codeString = "";
-				if(tab.url.toString().includes("yahoo"))
-				{
-					codeString = "document.getElementById('login-username').value='ajayt6';" +
-					"document.getElementById('login-passwd').value='"+ msg+ "';" +
-					"  document.forms[0].submit(); ";
+					var codeString = "";
 
 
-				}
-				else if(tab.url.toString().includes("google"))
-				{
-					codeString = "document.getElementById('Email').value='ajayt6';" +
-						"document.getElementById('Passwd-hidden').value='"+ msg+ "';" +
-						"  document.forms[0].submit(); ";
-				}
-				  chrome.tabs.executeScript(tab.id, {code: codeString});
-				  } );
+					if(tab.url.toString().includes("yahoo"))
+					{
+						console.log("inside yahoo branch");
+						var secretkey = "";
+						var encryptedUsername = "";
+						var encryptedPassword = "";
+
+						var retDef1 = chrome.storage.local.get('secretkey', function (result) {
+							console.log(result.secretkey)
+
+							secretkey = result.secretkey;
+
+							//console.log("key " + i + " has value for username as " + userSiteDetails[i]["encryptedUsername"]);
+						});
+
+						var retDef2 = chrome.storage.local.get('userSiteDetails', function (result) {
+								console.log(result.userSiteDetails);
+
+								var userSiteDetails = result.userSiteDetails;
+								encryptedUsername = userSiteDetails["yahoo"]["encryptedUsername"];
+								encryptedPassword = userSiteDetails["yahoo"]["encryptedPassword"];
+								//console.log("key " + i + " has value for username as " + userSiteDetails[i]["encryptedUsername"]);
+						});
+
+						$.when(retDef1,retDef2).then(function(){
+
+							var username = CryptoJS.AES.decrypt(encryptedUsername, secretkey);
+							var password = CryptoJS.AES.decrypt(encryptedPassword, secretkey);
+							codeString = "document.getElementById('login-username').value='" + username.toString(CryptoJS.enc.Utf8) +"';" +
+								"document.getElementById('login-passwd').value='"+ password.toString(CryptoJS.enc.Utf8) + "';" +
+								"  document.forms[0].submit(); ";
+
+							chrome.tabs.executeScript(tab.id, {code: codeString});
+
+						});
+
+
+
+
+					}
+					else if(tab.url.toString().includes("google"))
+					{
+						codeString = "document.getElementById('Email').value='ajayt6';" +
+							"document.getElementById('Passwd-hidden').value='"+ msg+ "';" +
+							"  document.forms[0].submit(); ";
+						chrome.tabs.executeScript(tab.id, {code: codeString});
+					}
+
+
+			  });
 			  //var newURL = "https://www.yahoo.com";
 				//chrome.tabs.create({ url: newURL });
 				//socket.broadcast.emit('chat message','yo yahoo');
