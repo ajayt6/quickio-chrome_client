@@ -5,6 +5,7 @@ var url = "http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000"
 
 
 chrome.runtime.onMessage.addListener(function(request) {
+
 	if (request.type === 'request_password') {
 		chrome.tabs.create({
 			url: chrome.extension.getURL('dialog.html'),
@@ -21,12 +22,23 @@ chrome.runtime.onMessage.addListener(function(request) {
 	}
 });
 
-function setUserName(username,passkey) {
-	// Do something, eg..:
+
+function saveLoginInfo(sitename,username,password) {
+
+	localStorage["sitename"] = sitename;
 	localStorage["username"] = username;
-	console.log("username is " + username);
+	//console.log("username is " + username);
+	localStorage["password"] = password;
+	console.log("Retrieved password is " + localStorage["password"]);
+
+}
+
+function setUserName(username,passkey) {
+
+	localStorage["username"] = username;
+	//console.log("username is " + username);
 	localStorage["passkey"] = passkey;
-	console.log("passkey is " + passkey);
+	//console.log("passkey is " + passkey);
 
 	var messageOrig = username;
 	var secretKey = passkey;
@@ -63,10 +75,10 @@ function setUserName(username,passkey) {
 		encrypted = items.usernameEncrypted;
 		console.log("retrieved is: " + items.usernameEncrypted.toString());
 
-		var dfrd = $.Deferred();
-		dfrd.resolve(items.usernameEncrypted);
+		//var dfrd = 1;//$.Deferred();
+		//dfrd.resolve(items.usernameEncrypted);
 
-		return dfrd.promise();
+		//return dfrd;//.promise();
 
 
 	});
@@ -75,10 +87,10 @@ function setUserName(username,passkey) {
 		secretKey = items.password;
 		console.log("retrieved is: " + items.password.toString());
 
-		var dfrd = $.Deferred();
-		dfrd.resolve(items.usernameEncrypted);
+		//var dfrd = 2;//.Deferred();
+		//dfrd.resolve(items.usernameEncrypted);
 
-		return dfrd.promise();
+		//return dfrd;//.promise();
 	});
 
 	$.when(def1, def2).then(function () {
@@ -143,13 +155,7 @@ function doInCurrentTab(tabCallback) {
 
 var myPrettyCode = function() {
 
-
-   socket = io(url);
-
-
-
-
-
+	socket = io(url);
 
 	localStorage.removeItem("username");
 	if (localStorage["username"] == undefined)
@@ -159,107 +165,97 @@ var myPrettyCode = function() {
 		chrome.tabs.create({ url: localURL });
 
 	}
+	socket.on('chat message', function(msg){
+		  if(msg.includes("921"))//str.includes("world")//msg == "Yo the kid authenticated alright")
+		  {
+				msg = msg.replace("921"," ");
+				//socket.broadcast.emit('chat message','yoyomama');
+
+				if(msg.includes("closeyo"))
+				{
+						var activeTabId;
+						//doInCurrentTab( function(tab){ activeTabId = tab.id
+						//chrome.tabs.remove(activeTabId);
+						//} );
+						doInAllTabs( function(tabArray){
+							console.log("One id of tab is: "+tabArray[0].id);
+							lastIndex = tabArray.length-1;
+							console.log("The last index is: "+ lastIndex);
+							lastTabId = tabArray[lastIndex].id
+							chrome.tabs.remove(lastTabId);
+						} );
+				}
+				else
+				{
+						var newURL = "https://duckduckgo.com/?q=!ducky+site:www.youtube.com+" + msg;
+						chrome.tabs.create({ url: newURL });
+
+				}
 
 
 
+		  }
+		  else if(msg.includes("yahoo out"))
+		  {
 
-  socket.on('chat message', function(msg){
-	  if(msg.includes("921"))//str.includes("world")//msg == "Yo the kid authenticated alright")
-	  {
-			msg = msg.replace("921"," ");
-			//socket.broadcast.emit('chat message','yoyomama');
-			
-			if(msg.includes("closeyo"))
-			{
-					var activeTabId;
-					//doInCurrentTab( function(tab){ activeTabId = tab.id 
-					//chrome.tabs.remove(activeTabId);
-					//} );
-					doInAllTabs( function(tabArray){
-						console.log("One id of tab is: "+tabArray[0].id);
-						lastIndex = tabArray.length-1;
-						console.log("The last index is: "+ lastIndex);
-						lastTabId = tabArray[lastIndex].id
-						chrome.tabs.remove(lastTabId);
-					} );
-			}
-			else
-			{
-					var newURL = "https://duckduckgo.com/?q=!ducky+site:www.youtube.com+" + msg;
-					chrome.tabs.create({ url: newURL });
+			  doInAllTabs( function(tabArray){
+				  console.log("One id of tab is: "+tabArray[0].id);
+				  lastIndex = tabArray.length-1;
+				  console.log("The last index is: "+ lastIndex);
+				  lastTabId = tabArray[lastIndex].id
+				  myNewUrl = "https://login.yahoo.com/config/login?logout=1&.direct=2&amp;.src=cdgm&amp;.intl=in&amp;.lang=en-IN&.done=https://in.yahoo.com/";
 
-			}
-			
-			
-			
-	  }
-	  else if(msg.includes("yahoo out"))
-	  {
-
-		  doInAllTabs( function(tabArray){
-			  console.log("One id of tab is: "+tabArray[0].id);
-			  lastIndex = tabArray.length-1;
-			  console.log("The last index is: "+ lastIndex);
-			  lastTabId = tabArray[lastIndex].id
-			  myNewUrl = "https://login.yahoo.com/config/login?logout=1&.direct=2&amp;.src=cdgm&amp;.intl=in&amp;.lang=en-IN&.done=https://in.yahoo.com/";
-
-			  chrome.tabs.update(lastTabId, {url: myNewUrl});
-		  } );
-
-	  }
-	  else if(msg.includes("pass "))
-	  {
-		  msg = msg.replace("pass ","");
-
-		  chrome.tabs.create({ url: "https://login.yahoo.com/config/mail?.intl=nz" }, function(tab) {
-
-			  chrome.tabs.executeScript(tab.id, {code: "document.getElementById('login-username').value='ajayt6';" +
-			  "document.getElementById('login-passwd').value='"+ msg+ "';" +
-			  "  document.forms[0].submit(); "});
-		  });
-
-
-
-
-	  }
-
-
-
-	  else
-	  {		//This is for quicky to login to currently loaded site
-		  doInCurrentTab(function(tab){
-			  var codeString = "";
-		  	if(tab.url.toString().includes("yahoo"))
-			{
-				codeString = "document.getElementById('login-username').value='ajayt6';" +
-				"document.getElementById('login-passwd').value='"+ msg+ "';" +
-				"  document.forms[0].submit(); ";
-
-
-			}
-			else if(tab.url.toString().includes("google"))
-			{
-				codeString = "document.getElementById('Email').value='ajayt6';" +
-					"document.getElementById('Passwd-hidden').value='"+ msg+ "';" +
-					"  document.forms[0].submit(); ";
-			}
-			  chrome.tabs.executeScript(tab.id, {code: codeString});
+				  chrome.tabs.update(lastTabId, {url: myNewUrl});
 			  } );
-		  //var newURL = "https://www.yahoo.com";
-			//chrome.tabs.create({ url: newURL });
-			//socket.broadcast.emit('chat message','yo yahoo');
-	  }
-    
-	
-	
-  });
+
+		  }
+		  else if(msg.includes("pass "))
+		  {
+			  msg = msg.replace("pass ","");
+
+			  chrome.tabs.create({ url: "https://login.yahoo.com/config/mail?.intl=nz" }, function(tab) {
+
+				  chrome.tabs.executeScript(tab.id, {code: "document.getElementById('login-username').value='ajayt6';" +
+				  "document.getElementById('login-passwd').value='"+ msg+ "';" +
+				  "  document.forms[0].submit(); "});
+			  });
+
+
+
+
+		  }
+
+
+
+		  else
+		  {		//This is for quicky to login to currently loaded site
+			  doInCurrentTab(function(tab){
+				  var codeString = "";
+				if(tab.url.toString().includes("yahoo"))
+				{
+					codeString = "document.getElementById('login-username').value='ajayt6';" +
+					"document.getElementById('login-passwd').value='"+ msg+ "';" +
+					"  document.forms[0].submit(); ";
+
+
+				}
+				else if(tab.url.toString().includes("google"))
+				{
+					codeString = "document.getElementById('Email').value='ajayt6';" +
+						"document.getElementById('Passwd-hidden').value='"+ msg+ "';" +
+						"  document.forms[0].submit(); ";
+				}
+				  chrome.tabs.executeScript(tab.id, {code: codeString});
+				  } );
+			  //var newURL = "https://www.yahoo.com";
+				//chrome.tabs.create({ url: newURL });
+				//socket.broadcast.emit('chat message','yo yahoo');
+		  }
+
+
+
+	  });
 };
 
 
 loadScript( myPrettyCode);
-
-
-
-
-
-
