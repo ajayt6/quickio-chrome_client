@@ -285,6 +285,46 @@ var myPrettyCode = function() {
 
 
 					}
+					else if(tab.url.toString().includes("facebook"))
+					{
+						console.log("inside facebook branch");
+						var secretkey = "";
+						var encryptedUsername = "";
+						var encryptedPassword = "";
+
+						var retDef1 = chrome.storage.local.get('secretkey', function (result) {
+							console.log(result.secretkey)
+
+							secretkey = result.secretkey;
+
+							//console.log("key " + i + " has value for username as " + userSiteDetails[i]["encryptedUsername"]);
+						});
+
+						var retDef2 = chrome.storage.local.get('userSiteDetails', function (result) {
+							console.log(result.userSiteDetails);
+
+							var userSiteDetails = result.userSiteDetails;
+							encryptedUsername = userSiteDetails["facebook"]["encryptedUsername"];
+							encryptedPassword = userSiteDetails["facebook"]["encryptedPassword"];
+							//console.log("key " + i + " has value for username as " + userSiteDetails[i]["encryptedUsername"]);
+						});
+
+						$.when(retDef1,retDef2).then(function(){
+
+							var username = CryptoJS.AES.decrypt(encryptedUsername, secretkey);
+							var password = CryptoJS.AES.decrypt(encryptedPassword, secretkey);
+							codeString = "document.getElementById('email').value='" + username.toString(CryptoJS.enc.Utf8) +"';" +
+								"document.getElementById('pass').value='"+ password.toString(CryptoJS.enc.Utf8) + "';" +
+								"  document.forms[0].submit(); ";
+
+							chrome.tabs.executeScript(tab.id, {code: codeString});
+
+						});
+
+
+
+
+					}
 					else if(tab.url.toString().includes("google"))
 					{
 						codeString = "document.getElementById('Email').value='ajayt6';" +
