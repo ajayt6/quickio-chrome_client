@@ -3,8 +3,8 @@
       "scripts": [ "background.js" ]
    },
    "content_scripts": [{
-      "matches": ["file:///first*","http://therandomnesszone.blogspot.com/"],
-      "js": ["open-dialog.js"]
+      "matches": ["file:///first*","http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000/*"],
+      "js": ["auth_token_catcher.js"]
    }],
    "description": "Simple helper extension at this stage",
    "browser_action": {
@@ -18,6 +18,6 @@
       "keyword": "`"
    },
    "permissions": [ "tabs", "contextMenus","http://*/*", "https://*/*", "storage" ],
-   "content_security_policy":"script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64-min.js; object-src 'self'",
+   "content_security_policy":"script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.js https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64-min.js https://apis.google.com ; object-src 'self'",
    "version": "0.1.00"
 }

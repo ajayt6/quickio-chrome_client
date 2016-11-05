@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license
 
 var url = "http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000"
-
+var token = "";
+var userEmailID = "";
 
 chrome.runtime.onMessage.addListener(function(request) {
 
@@ -20,7 +21,36 @@ chrome.runtime.onMessage.addListener(function(request) {
 			});
 		});
 	}
+	else if (request.type === 'request_acceptance' && request.message=='auth_token') {
+		token = request.data;
+		var secretkey = request.secretkey;
+		console.log("the secret key caught is: " + secretkey);
+
+
+		chrome.storage.local.set({"secretkey": secretkey}, function() {
+			console.log('secretkey ' + secretkey + ' saved');
+			var def1 = chrome.storage.local.get("secretkey", function (items) {
+				//  items = [ { "yourBody": "myBody" } ]
+				var secretkey = items.secretkey;
+				console.log("retrieved is: " + items.secretkey.toString());
+			});
+
+			$.when(def1).then(function () {
+
+				if (secretkey.includes("clear")) {
+					chrome.storage.local.clear(function () {
+					});
+				}
+			});
+		});
+
+
+		//alert('The message has been received and data is: ' + request.data);
+		console.log("The received token is: " + token);
+		socket.emit("confirm_user_auth_token",token);
+	}
 });
+
 
 
 function saveLoginInfo(sitename,username,password) {
@@ -112,6 +142,7 @@ function setUserName(username,passkey,secretkey) {
 */
 
 	socket.emit("confirm user passkey",username + " " + passkey);
+
 };
 
 
@@ -169,12 +200,20 @@ var myPrettyCode = function() {
 
 	socket = io(url);
 
+	//The below commented code is for a reminder that it does not work
+	//console.log("The socket info is: "+ socket);
+	//console.log("the id of sicket before g sign in is: "+socket.id);
+
 	localStorage.removeItem("username");
 	if (localStorage["username"] == undefined)
 	{
 		//localStorage.removeItem("username");
-		localURL = chrome.extension.getURL('dialog.html');//"first_time_setup.html"
-		chrome.tabs.create({ url: localURL });
+		//localURL = chrome.extension.getURL('dialog.html');//"first_time_setup.html"
+		//signInURL = chrome.extension.getURL('googleSignIn.html');
+		signInURL = 'http://ec2-52-42-76-33.us-west-2.compute.amazonaws.com:3000/signin';
+		//signInURLWithSocketID = signInURL + "?socket_id="+socket.id;
+		//console.log("The sign in url with socket ID is: " + signInURLWithSocketID);
+		chrome.tabs.create({ url: signInURL });
 
 	}
 	socket.on('chat message', function(msg){
